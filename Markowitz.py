@@ -61,7 +61,9 @@ class EqualWeightPortfolio:
         """
         TODO: Complete Task 1 Below
         """
-
+        n = len(assets)
+        self.portfolio_weights[assets] = 1.0 / n
+        self.portfolio_weights[self.exclude] = 0.0
         """
         TODO: Complete Task 1 Above
         """
@@ -112,6 +114,26 @@ class RiskParityPortfolio:
         """
         TODO: Complete Task 2 Below
         """
+        # 1. 計算每個資產的滾動波動度（標準差）
+        rolling_std = df_returns[assets].rolling(window=self.lookback).std()
+
+        # 2. 計算反波動度
+        inv_vol = 1.0 / rolling_std
+
+        total_vol = 0
+        for i in inv_vol:
+            total_vol += i
+        
+        weights = []
+        for i in inv_vol:
+            weights.append(inv_vol / total_vol)
+        
+
+        # 4. 把計算好的權重填回 portfolio_weights
+        self.portfolio_weights[assets] = weights
+
+        # 5. 強制把要排除的資產權重設為 0
+        self.portfolio_weights[self.exclude] = 0
 
         """
         TODO: Complete Task 2 Above
