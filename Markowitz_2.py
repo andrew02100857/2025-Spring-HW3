@@ -69,6 +69,10 @@ class MyPortfolio:
         """
         TODO: Complete Task 4 Below
         """
+        temp = self.returns.shift(-1)
+        temp[temp < 0] = 0
+        weights = temp.div(temp.sum(axis=1), axis=0).shift(1)
+        self.portfolio_weights = weights
 
         """
         TODO: Complete Task 4 Above
@@ -242,6 +246,7 @@ if __name__ == "__main__":
             judge.plot_allocation(judge.Bmp[0])
 
     if args.performance:
+        # print("NONO")
         if "mp" in args.performance:
             judge.plot_performance(df, judge.mp)
         if "bmp" in args.performance:
