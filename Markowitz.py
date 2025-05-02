@@ -10,6 +10,14 @@ import gurobipy as gp
 import argparse
 import warnings
 
+# 顯示所有列、所有欄
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
+# 取消列寬自動換行限制（視需要）
+pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', None)
+
 """
 Project Setup
 """
@@ -114,26 +122,12 @@ class RiskParityPortfolio:
         """
         TODO: Complete Task 2 Below
         """
-        # 1. 計算每個資產的滾動波動度（標準差）
-        rolling_std = df_returns[assets].rolling(window=self.lookback).std()
-
-        # 2. 計算反波動度
-        inv_vol = 1.0 / rolling_std
-
-        total_vol = 0
-        for i in inv_vol:
-            total_vol += i
-        
-        weights = []
-        for i in inv_vol:
-            weights.append(inv_vol / total_vol)
-        
-
-        # 4. 把計算好的權重填回 portfolio_weights
+        temp_returns = df_returns.shift(-1)
+        std_temp = temp_returns[assets].rolling(window=self.lookback).std()
+        std = std_temp.shift(2)
+        inv_vol = 1.0 / std
+        weights = inv_vol.div(inv_vol.sum(axis=1), axis=0)
         self.portfolio_weights[assets] = weights
-
-        # 5. 強制把要排除的資產權重設為 0
-        self.portfolio_weights[self.exclude] = 0
 
         """
         TODO: Complete Task 2 Above
@@ -141,6 +135,7 @@ class RiskParityPortfolio:
 
         self.portfolio_weights.ffill(inplace=True)
         self.portfolio_weights.fillna(0, inplace=True)
+
 
     def calculate_portfolio_returns(self):
         # Ensure weights are calculated
